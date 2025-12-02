@@ -9,30 +9,19 @@ import appRouter from "./routes";
 import { swaggerOptions } from "./swaggerOptions";
 import { seedAdmin } from "./seeder/seeder.service";
 
-
 // define app
 seedAdmin();
 const app = express();
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-
-
-
 // middleware
-app.use(
-  cors({
-    origin: ["http://localhost:3000"],
-    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json({ limit: "100mb" }));
 app.use(express.raw());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", appRouter);
-
 
 // stating point
 app.get("/", (req: Request, res: Response) => {
@@ -43,16 +32,9 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-    
-
-
 // global error handler
 app.use(globalErrorHandler);
 app.use(notFound);
 
 // export app
 export default app;
-
-
-
-
