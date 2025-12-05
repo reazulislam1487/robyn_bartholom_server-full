@@ -9,7 +9,6 @@ import { portfolio_model } from "./portfolio.schema";
 const create_new_portfolio_into_db = async (
   portfolioData: T_Portfolio,
   file?: Express.Multer.File
-
 ) => {
   try {
     let newImageUrl = "";
@@ -90,12 +89,16 @@ const update_portfolio_from_db = async (
   }
 };
 // Get all portfolios with filtering + pagination
-const get_all_portfolios_from_db = async ({ page = 1, limit = 10, network = null }) => {
+const get_all_portfolios_from_db = async ({
+  page = 1,
+  limit = 6,
+  network = null,
+}) => {
   const query: any = {};
 
   // 🔍 FILTER BY NETWORK
   if (network) {
-    query.network = network; 
+    query.network = network;
     // If you want partial match:
     // query.network = { $regex: network, $options: "i" };
   }
@@ -125,7 +128,6 @@ const get_all_portfolios_from_db = async ({ page = 1, limit = 10, network = null
 };
 
 // const get_all_portfolios_from_db = async () => {
-
 
 //   const result = await portfolio_model.find();
 //   return result;
