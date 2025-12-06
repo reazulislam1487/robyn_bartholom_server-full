@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { booking_model } from "./booking.schema";
 import { User_Model } from "../user/user.schema";
 import transporter from "../../utils/nodemailer";
+import { FROM_EMAIL, sgMail } from "../../configs/emailConfig";
 
 // Create new Booking
 const create_new_booking_into_db = async (bookingData: any) => {
@@ -19,33 +20,28 @@ const create_new_booking_into_db = async (bookingData: any) => {
   const result = await booking_model.create(dataToSave);
 
   // 🔔 Notification Logic
-
   if (result) {
     const admin: any = await User_Model.findOne(); // Only 1 user exists
 
     if (admin?.notificationPreferences?.bookingNotifications === true) {
       const adminEmail = admin.email;
 
-      // Send email
       try {
-        await transporter.sendMail({
-          from: process.env.FROM_EMAIL,
+        // SendGrid Message Object
+        const msg = {
           to: adminEmail,
+          from: FROM_EMAIL, // from config file
           subject: `New Booking from ${data.fullName}`,
           replyTo: data.email,
-          text: data.additionalInfo || "New booking request received.",
-
           html: `
 <div style="font-family: Arial, sans-serif; background-color: #f4f7fa; padding: 20px;">
 
   <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
 
-    <!-- Header -->
     <div style="background: linear-gradient(135deg, #4c6ef5, #15aabf); padding: 20px; color: white;">
       <h2 style="margin: 0; font-size: 20px;">New Booking Received</h2>
     </div>
 
-    <!-- Body -->
     <div style="padding: 25px; color: #333; font-size: 15px; line-height: 1.6;">
       <p>Hello Robyn,</p>
 
@@ -65,7 +61,6 @@ const create_new_booking_into_db = async (bookingData: any) => {
       <p style="margin-top: 25px;">Best regards,<br><strong>Robyn Bartholom Website</strong></p>
     </div>
 
-    <!-- Footer -->
     <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e2e8f0;">
       <p style="margin: 0;">Reply will go directly to: <strong>${
         data.email
@@ -76,65 +71,103 @@ const create_new_booking_into_db = async (bookingData: any) => {
 
 </div>
 `,
-        });
+        };
+
+        // Send Email via SendGrid
+        await sgMail.send(msg);
+
+        console.log("📧 SendGrid Email Sent to:", adminEmail);
       } catch (error) {
-        console.error("❌ Email send failed:", error);
+        console.error("❌ SendGrid Email Error:", error);
       }
     }
   }
 
   return result;
 };
+// Create new Booking
+// const create_new_booking_into_db = async (bookingData: any) => {
+//   const data = bookingData.body;
 
-//  Get all Bookings
-// const get_all_booking_from_db = async (
-//   status?: "pending" | "approved" | "rejected",
-//   search?: string,
-//   page?: number,
-//   limit?: number
-// ) => {
-//   let query: any = {};
-//   // Filter by status if provided
-//   if (status) {
-//     query.status = status;
-//   }
+//   // Combine date + time
+//   const combinedDateTimeString = `${data.preferredDate} ${data.preferredTime}`;
+//   const formattedDateTime = new Date(combinedDateTimeString);
 
-//   // Pagination logic
-//   const pageNumber = page || 1;
-//   const limitNumber = limit || 10;
-//   const skip = (pageNumber - 1) * limitNumber;
-//   // Search by fullName, company, or consultationType
-
-//   if (search) {
-//     // ✅ Remove extra white spaces & make case-insensitive regex
-//     const cleanedSearch = search.trim().replace(/\s+/g, " ");
-//     query = {
-//       $or: [
-//         { fullName: { $regex: cleanedSearch, $options: "i" } },
-//         { company: { $regex: cleanedSearch, $options: "i" } },
-//         { consultationType: { $regex: cleanedSearch, $options: "i" } },
-//       ],
-//     };
-//   }
-//   const result = await booking_model
-//     .find(query)
-//     .sort({ createdAt: -1 })
-//     .skip(skip)
-//     .limit(limitNumber);
-//   // Total count for frontend
-//   const totalDocuments = await booking_model.countDocuments(query);
-//   const totalPages = Math.ceil(totalDocuments / limitNumber);
-
-//   return {
-//     meta: {
-//       totalDocuments,
-//       totalPages,
-//       currentPage: pageNumber,
-//       limit: limitNumber,
-//     },
-//     data: result,
+//   const dataToSave = {
+//     ...data,
+//     preferredDate: formattedDateTime,
 //   };
+
+//   const result = await booking_model.create(dataToSave);
+
+//   // 🔔 Notification Logic
+
+//   if (result) {
+//     const admin: any = await User_Model.findOne(); // Only 1 user exists
+
+//     if (admin?.notificationPreferences?.bookingNotifications === true) {
+//       const adminEmail = admin.email;
+
+//       // Send email
+//       try {
+//         await transporter.sendMail({
+//           from: process.env.FROM_EMAIL,
+//           to: adminEmail,
+//           subject: `New Booking from ${data.fullName}`,
+//           replyTo: data.email,
+//           text: data.additionalInfo || "New booking request received.",
+
+//           html: `
+// <div style="font-family: Arial, sans-serif; background-color: #f4f7fa; padding: 20px;">
+
+//   <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+//     <!-- Header -->
+//     <div style="background: linear-gradient(135deg, #4c6ef5, #15aabf); padding: 20px; color: white;">
+//       <h2 style="margin: 0; font-size: 20px;">New Booking Received</h2>
+//     </div>
+
+//     <!-- Body -->
+//     <div style="padding: 25px; color: #333; font-size: 15px; line-height: 1.6;">
+//       <p>Hello Robyn,</p>
+
+//       <p>You have received a new booking request. Here are the details:</p>
+
+//       <div style="margin-top: 12px;">
+//         <p><strong>Client Name:</strong> ${data.fullName}</p>
+//         <p><strong>Email:</strong> ${data.email}</p>
+//         <p><strong>Consultation Type:</strong> ${data.consultationType}</p>
+//         <p><strong>Preferred Date:</strong> ${data.preferredDate}</p>
+//         <p><strong>Preferred Time:</strong> ${data.preferredTime}</p>
+//         <p><strong>Additional Info:</strong><br/> ${
+//           data.additionalInfo || "No additional info provided."
+//         }</p>
+//       </div>
+
+//       <p style="margin-top: 25px;">Best regards,<br><strong>Robyn Bartholom Website</strong></p>
+//     </div>
+
+//     <!-- Footer -->
+//     <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e2e8f0;">
+//       <p style="margin: 0;">Reply will go directly to: <strong>${
+//         data.email
+//       }</strong></p>
+//     </div>
+
+//   </div>
+
+// </div>
+// `,
+//         });
+//       } catch (error) {
+//         console.error("❌ Email send failed:", error);
+//       }
+//     }
+//   }
+
+//   return result;
 // };
+
 const get_all_booking_from_db = async (
   status?: "pending" | "approved" | "rejected",
   search?: string,
