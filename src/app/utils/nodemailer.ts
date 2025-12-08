@@ -9,6 +9,5 @@ const transporter = nodemailer.createTransport({
     user: "apikey", // fixed string
     pass: process.env.SENDGRID_API_KEY, // your SendGrid API key
   },
-
 });
 export default transporter;
