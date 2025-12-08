@@ -1,3 +1,4 @@
+import { sgMail } from "../../configs/emailConfig";
 import transporter from "../../utils/nodemailer";
 import { User_Model } from "../user/user.schema";
 import { reviews_model } from "./reviews.schema";
@@ -112,7 +113,7 @@ const create_new_reviews_into_db = async (reviewData: any) => {
         // =======================================
         await sgMail.send({
           to: adminEmail,
-          from: process.env.FROM_EMAIL,
+          from: process.env.FROM_EMAIL!,
           subject: `New Review from ${data.name}`,
           replyTo: data.email,
           text: data.yourReview,
