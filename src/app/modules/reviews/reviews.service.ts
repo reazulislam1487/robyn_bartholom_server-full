@@ -1,5 +1,4 @@
 import { sgMail } from "../../configs/emailConfig";
-import transporter from "../../utils/nodemailer";
 import { User_Model } from "../user/user.schema";
 import { reviews_model } from "./reviews.schema";
 
@@ -75,7 +74,6 @@ import { reviews_model } from "./reviews.schema";
 //   return result;
 // };
 // Get all reviews by status
-
 const create_new_reviews_into_db = async (reviewData: any) => {
   const { rating } = reviewData;
   const data = reviewData;
@@ -94,31 +92,16 @@ const create_new_reviews_into_db = async (reviewData: any) => {
       const adminEmail = admin.email;
 
       try {
-        // ===============================
-        // TRY SENĐ VIA NODEMAILER (SMTP)
-        // ===============================
-        await transporter.sendMail({
-          from: process.env.FROM_EMAIL,
-          to: adminEmail,
-          subject: `New Review from ${data.name}`,
-          replyTo: data.email,
-          text: data.yourReview || "New Review request received.",
-          html: buildHtmlTemplate(data),
-        });
-      } catch (smtpErr) {
-        console.error("SMTP failed → switching to SendGrid API");
-
-        // =======================================
-        // IF SMTP FAILS → SENDGRID API FALLBACK
-        // =======================================
         await sgMail.send({
           to: adminEmail,
           from: process.env.FROM_EMAIL!,
           subject: `New Review from ${data.name}`,
           replyTo: data.email,
-          text: data.yourReview,
+          text: data.yourReview || "New Review request received.",
           html: buildHtmlTemplate(data),
         });
+      } catch (error) {
+        console.error("SendGrid email failed:", error);
       }
     }
   }
