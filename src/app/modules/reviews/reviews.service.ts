@@ -75,11 +75,6 @@ import { reviews_model } from "./reviews.schema";
 // };
 // Get all reviews by status
 
-import transporter from "../../utils/nodemailer";
-import { sgMail } from "../../configs/sendgrid"; // fallback sendgrid
-import { User_Model } from "../user/user.schema";
-import { reviews_model } from "./reviews.schema";
-
 const create_new_reviews_into_db = async (reviewData: any) => {
   const { rating } = reviewData;
   const data = reviewData;
