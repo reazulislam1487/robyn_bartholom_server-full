@@ -22,7 +22,7 @@ const get_all_reviews = catchAsync(async (req, res) => {
   const page = req.query.page
     ? parseInt(req.query.page as string, 10)
     : undefined;
-     const limit = req.query.limit
+  const limit = req.query.limit
     ? parseInt(req.query.limit as string, 10)
     : undefined;
   const result = await reviews_service.get_all_reviews_from_db(
@@ -89,12 +89,29 @@ const get_review_by_id = catchAsync(async (req, res) => {
     data: result,
   });
 });
-
+const delete_review_by_id = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await reviews_service.delete_review_by_id_from_db(id);
+  if (!result) {
+    return manageResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: "Review not found",
+      data: null,
+    });
+  }
+  manageResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Review successfully deleted!",
+    data: result,
+  });
+});
 
 export const reviews_controller = {
   create_new_reviews,
   get_all_reviews,
   update_reviews_status_by_id,
   get_review_by_id,
-  
+  delete_review_by_id,
 };

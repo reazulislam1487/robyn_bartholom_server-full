@@ -195,12 +195,17 @@ const get_review_by_id_from_db = async (id: string) => {
   const result = await reviews_model.findById(id);
   return result;
 };
+const delete_review_by_id_from_db = async (id: string) => {
+  const result = await reviews_model.findByIdAndDelete(id);
+  return result;
+};
 
 export const reviews_service = {
   create_new_reviews_into_db,
   get_all_reviews_from_db,
   update_reviews_status_in_db,
   get_review_by_id_from_db,
+  delete_review_by_id_from_db,
 };
 
 //

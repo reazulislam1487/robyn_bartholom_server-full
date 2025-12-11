@@ -21,6 +21,6 @@ email_router.get("/get-all", email_controller.get_all_emails);
 email_router.get("/:id", email_controller.get_email_by_id);
 // delete email by id
 email_router.delete("/:id", email_controller.delete_email_by_id);
-// get dashboard summery 
+// get dashboard summery
 email_router.get("/dashboard/summary", email_controller.get_dashboard_summary);
 export default email_router;

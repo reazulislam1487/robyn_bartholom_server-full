@@ -16,5 +16,6 @@ reviews_router.get("/", reviews_controller.get_all_reviews);
 reviews_router.patch("/:id", reviews_controller.update_reviews_status_by_id);
 // get review by
 reviews_router.get("/:id", reviews_controller.get_review_by_id);
+reviews_router.delete("/:id", reviews_controller.delete_review_by_id);
 
 export default reviews_router;
